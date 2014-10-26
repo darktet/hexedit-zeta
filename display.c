@@ -105,13 +105,14 @@ void initCurses(void)
   initscr();
 
 #ifdef HAVE_COLORS
-  if (colored) {
+  // if (colored) {
     start_color();
     use_default_colors();
     init_pair(1, COLOR_RED, -1);   /* null zeros */
     init_pair(2, COLOR_GREEN, -1); /* control chars */
     init_pair(3, COLOR_BLUE, -1);  /* extended chars */
-  }
+    init_pair(4, COLOR_CYAN, -1);
+  // }
 #endif
 
   refresh();
@@ -176,10 +177,18 @@ void display(void)
   move(LINES - 1, 0);
   if (isReadOnly) i = '%';
   else if (edited) i = '*';
-  else i = '-';
-  printw("-%c%c  %s       --0x%llX", i, i, baseName, base + cursor);
-  if (MAX(fileSize, lastEditedLoc)) printw("/0x%llX", getfilesize());
+  else i = ' ';
+
+  int cu = colsUsed * 3 / 4;
+  cu = cu - cu % 13 + 11 - 13 - 2;
+  move(LINES-1, cu);
+  attron(COLOR_PAIR(4));
+  printw("  0x%llX(%lld)", base + cursor, base + cursor);
+  if (MAX(fileSize, lastEditedLoc)) printw("/0x%llX(%lld)", getfilesize(), getfilesize());
+  printw(", %c %s", i, baseName);
   if (mode == bySector) printw("--sector %lld", (base + cursor) / SECTOR_SIZE);
+  printw("  ");
+  attroff(COLOR_PAIR(4));
 
   move(cursor / lineLength, computeCursorXCurrentPos());
 }
@@ -226,6 +235,15 @@ void displayOneLineMessage(char *msg)
   clr_line(center - 1);
   clr_line(center + 1);
   displayCentered(msg, center);
+}
+
+void modeline_message(char *msg, int pos) {
+  if (pos < 0) {    // end
+    pos = colsUsed - strlen(msg) + pos;
+  }
+  move(LINES - 1, pos);
+  clr_line(LINES - 1);
+  PRINTW(("%s", msg));
 }
 
 void displayTwoLineMessage(char *msg1, char *msg2)
@@ -275,6 +293,20 @@ int get_number(INT *i)
   echo();
   getnstr(tmp, BLOCK_SEARCH_SIZE - 1);
   noecho();
+  if (!strcmp(tmp, "") || !strcmp(tmp, "0x")) {
+    *i = cursor;
+    return 1;
+  }
+  int j;
+  for (j = 0; j < BLOCK_SEARCH_SIZE; j++) {
+    if (tmp[j] == '\0') break;
+    if (j == 2 && tmp[j] == 'g') {
+      tmp[j] = '0';
+    }
+    if (!(isxdigit(tmp[j]) || (j == 1 && tmp[j] == 'x' && tmp[0] == '0'))) {
+      return 0;
+    }
+  }
   if (strbeginswith(tmp, "0x"))
     err = sscanf(tmp + strlen("0x"), "%llx", i);
   else

@@ -154,6 +154,7 @@ void displayLine(int offset, int max);
 void clr_line(int line);
 void displayCentered(char *msg, int line);
 void displayOneLineMessage(char *msg);
+void modeline_message(char *msg, int pos);
 void displayTwoLineMessage(char *msg1, char *msg2);
 void displayMessageAndWaitForKey(char *msg);
 int displayMessageAndGetString(char *msg, char **last, char *p, int p_size);

@@ -236,7 +236,7 @@ int setTo(int c)
 int ask_about_save(void)
 {
   if (edited) {
-    displayOneLineMessage("Save changes (Yes/No/Cancel) ?");
+    modeline_message("Save changes (Yes/No/Cancel) ?", 0);
 
     switch (tolower(getch()))
       {
@@ -270,9 +270,30 @@ static void goto_char(void)
 {
   INT i;
 
-  displayOneLineMessage("New position ? ");
+  // displayOneLineMessage("New position ? ");
+  modeline_message(":", 0);
   ungetstr("0x");
-  if (!get_number(&i) || !set_cursor(i)) displayMessageAndWaitForKey("Invalid position!");
+  if (!get_number(&i) || !set_cursor(i)) {
+    modeline_message("Invalid position!", 0);
+    getch();
+  }
+}
+
+static void command_mode(void) {
+  modeline_message(":", 0);
+  char tmp[BLOCK_SEARCH_SIZE];
+  echo();
+  getnstr(tmp, BLOCK_SEARCH_SIZE - 1);
+  noecho();
+  int j = 0;
+  for (; j < BLOCK_SEARCH_SIZE; j++) {
+    if (tmp[j] == '\0') break;
+    if (tmp[j] == 'w') {
+      save_buffer();
+    } else if (tmp[j] == 'q') {
+      ask_about_save_and_quit();
+    }
+  }
 }
 
 static void goto_sector(void)
@@ -333,7 +354,8 @@ static void help(void)
 
 static void short_help(void)
 {
-  displayMessageAndWaitForKey("Unknown command, press F1 for help");
+  modeline_message("Unknown command, press F1 for help", 0);
+  getch();
 }
 
 
@@ -364,7 +386,9 @@ int key_to_function(int key)
 
     case 'j':
       if (!hexOrAscii) { goto SET_KEY; }
+    case '\n':
     case KEY_DOWN:
+    case KEY_ENTER:
       next_line();
       break;
 
@@ -394,6 +418,7 @@ int key_to_function(int key)
 
     case '^':
       if (!hexOrAscii) { goto SET_KEY; }
+    case '\r':
     case CTRL('A'):
     case KEY_HOME:
       beginning_of_line();
@@ -462,17 +487,11 @@ int key_to_function(int key)
     case 'g':
       if (!hexOrAscii) { goto SET_KEY; }
     case KEY_F(4):
-      goto_char();
+      if (mode == bySector) goto_sector(); else goto_char();
       break;
 
     case ALT('L'):
       recenter();
-      break;
-
-    case '\n':
-    case '\r':
-    case KEY_ENTER:
-      if (mode == bySector) goto_sector(); else goto_char();
       break;
 
     case CTRL('W'):
@@ -535,6 +554,11 @@ int key_to_function(int key)
       if (!hexOrAscii) { goto SET_KEY; }
     case KEY_F(11):
       yank_to_a_file();
+      break;
+
+    case ':':
+      if (!hexOrAscii) { goto SET_KEY; }
+      command_mode();
       break;
 
     case KEY_F(12):
