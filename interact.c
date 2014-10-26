@@ -158,6 +158,15 @@ static void delete_backward_chars(void)
   if (!tryloc(base + cursor)) end_of_buffer();
 }
 
+static void delete_forward_char(void) {
+  removeFromEdited(base + cursor, 1);
+  forward_char();
+  forward_char();
+  readFile();
+  cursorOffset = 0;
+  if (!tryloc(base + cursor)) end_of_buffer();
+}
+
 static void truncate_file(void)
 {
   displayOneLineMessage("Really truncate here? (y/N)");
@@ -167,11 +176,11 @@ static void truncate_file(void)
     else {
       removeFromEdited(base+cursor, lastEditedLoc - (base+cursor));
       if (mark_set) {
-	if (mark_min >= base + cursor || mark_max >= base + cursor)
-	  unmarkAll();
+        if (mark_min >= base + cursor || mark_max >= base + cursor)
+          unmarkAll();
       }
       if (biggestLoc > base+cursor)
-	biggestLoc = base+cursor;
+        biggestLoc = base+cursor;
       readFile();
     }
   }
@@ -204,7 +213,7 @@ int setTo(int c)
   if (cursor > nbBytes) return FALSE;
   if (hexOrAscii) {
       if (!isxdigit(c)) return FALSE;
-      val = hexCharToInt(c);	  
+      val = hexCharToInt(c);
       val = cursorOffset ? setLowBits(buffer[cursor], val) : setHighBits(buffer[cursor], val);
   }
   else val = c;
@@ -235,7 +244,7 @@ int ask_about_save(void)
       case 'n': discardEdited(); break;
 
       default:
-	return FALSE;
+        return FALSE;
       }
     return TRUE;
   }
@@ -286,8 +295,8 @@ static void save_buffer(void)
   for (p = edited; p; p = q) {
     if (LSEEK_(fd, p->base) == -1 || write(fd, p->vals, p->size) == -1)
       if (!displayedmessage) {  /* It would be annoying to display lots of error messages when we can't write. */
-	displayMessageAndWaitForKey(strerror(errno));
-	displayedmessage = TRUE;
+        displayMessageAndWaitForKey(strerror(errno));
+        displayedmessage = TRUE;
       }
     q = p->next;
     freePage(p);
@@ -341,71 +350,82 @@ int key_to_function(int key)
 
   switch (key) 
     {
+    case 'l':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_RIGHT:
-    case CTRL('F'):
       forward_char();
       break;
 
+    case 'h':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_LEFT:
-    case CTRL('B'):
       backward_char();
       break;
 
+    case 'j':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_DOWN:
-    case CTRL('N'):
       next_line();
       break;
 
+    case 'k':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_UP:
-    case CTRL('P'):
       previous_line();
       break;
 
-    case ALT('F'):
+    case 'w':
+      if (!hexOrAscii) { goto SET_KEY; }
       forward_chars();
       break;
 
-    case ALT('B'):
+    case 'W':
+      if (!hexOrAscii) { goto SET_KEY; }
       backward_chars();
       break;
 
-    case ALT('N'):
+    case CTRL('D'):
       next_lines();
       break;
 
-    case ALT('P'):
+    case CTRL('U'):
       previous_lines();
       break;
 
+    case '^':
+      if (!hexOrAscii) { goto SET_KEY; }
     case CTRL('A'):
     case KEY_HOME:
       beginning_of_line();
       break;
 
+    case '$':
+      if (!hexOrAscii) { goto SET_KEY; }
     case CTRL('E'):
     case KEY_END:
       end_of_line();
       break;
 
     case KEY_NPAGE:
-    case CTRL('V'):
+    case CTRL('F'):
     case KEY_F(6):
       scroll_up();
       break;
 
     case KEY_PPAGE:
-    case ALT('V'):
+    case CTRL('B'):
     case KEY_F(5):
       scroll_down();
       break;
 
     case '<':
-    case ALT('<'):
+      if (!hexOrAscii) { goto SET_KEY; }
       beginning_of_buffer();
       break;
 
     case '>':
-    case ALT('>'):
+    case 'G':
+      if (!hexOrAscii) { goto SET_KEY; }
       end_of_buffer();
       break;
 
@@ -414,7 +434,8 @@ int key_to_function(int key)
       suspend();
       break;
 
-    case CTRL('U'):
+    case 'u':
+      if (!hexOrAscii) { goto SET_KEY; }
     case CTRL('_'):
       undo();
       break;
@@ -423,21 +444,23 @@ int key_to_function(int key)
       quoted_insert();
       break;
 
-    case CTRL('T'):
     case '\t':
+    case CTRL('T'):
       toggle();
       break;
 
     case '/':
-    case CTRL('S'):
+      if (!hexOrAscii) { goto SET_KEY; }
       search_forward();
       break;
 
-    case CTRL('R'):
+    case '?':
+      if (!hexOrAscii) { goto SET_KEY; }
       search_backward();
       break;
 
-    case CTRL('G'):
+    case 'g':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_F(4):
       goto_char();
       break;
@@ -462,7 +485,6 @@ int key_to_function(int key)
       break;
 
     case KEY_F(1):
-    case ALT('H'):
       help();
       break;
 
@@ -477,6 +499,7 @@ int key_to_function(int key)
 
     case CTRL('H'):
     case KEY_BACKSPACE:
+    case 0x7F: /* found on a sun */
       delete_backward_char();
       break;
 
@@ -484,32 +507,37 @@ int key_to_function(int key)
       delete_backward_chars();
       break;
 
-    case CTRL(' '):
+    case 'x':
+      if (!hexOrAscii) { goto SET_KEY; }
+    case KEY_DC:
+      delete_forward_char();
+      break;
+
+    case 'v':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_F(9):
       set_mark_command();
       break;
 
-    case CTRL('D'):
-    case ALT('W'):
-    case KEY_DC:
+    case 'y':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_F(7):
-    case 0x7F: /* found on a sun */
       copy_region();
       break;
 
-    case CTRL('Y'):
-    case KEY_IC:
+    case 'p':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_F(8):
       yank();
       break;
 
-    case ALT('Y'):
+    case 'P':
+      if (!hexOrAscii) { goto SET_KEY; }
     case KEY_F(11):
       yank_to_a_file();
       break;
 
     case KEY_F(12):
-    case ALT('I'):
       fill_with_string();
       break;
 
@@ -521,13 +549,13 @@ int key_to_function(int key)
       truncate_file();
       break;
 
-    case KEY_F(0):
     case KEY_F(10):
     case CTRL('X'):
       ask_about_save_and_quit();
       break;
 
     default:
+SET_KEY:
       if ((key >= 256 || !setTo(key))) firstTimeHelp();
     }
 
@@ -544,40 +572,6 @@ static void escaped_command(void)
   c = getch();
   switch (c)
   {
-  case KEY_RIGHT:
-  case 'f': 
-    forward_chars();
-    break;
-    
-  case KEY_LEFT:
-  case 'b':
-    backward_chars();
-    break;
-
-  case KEY_DOWN:
-  case 'n':
-    next_lines();
-    break;
-
-  case KEY_UP:
-  case 'p':
-    previous_lines();
-    break;
-
-  case 'v':
-    scroll_down();
-    break;
-
-  case KEY_HOME:
-  case '<':
-    beginning_of_buffer();
-    break;
-
-  case KEY_END:
-  case '>':
-    end_of_buffer();
-    break;
-
   case 'l':
     recenter();
     break;
@@ -586,112 +580,9 @@ static void escaped_command(void)
     help();
     break;
 
-  case CTRL('H'):
-    delete_backward_chars();
-    break;
-
-  case 'w':
-    copy_region();
-    break;
-
-  case 'y':
-    yank_to_a_file();
-    break;
-
-  case 'i':
-    fill_with_string();
-    break;
-
-  case 't':
-    truncate_file();
-    break;
-
-  case '':
-    c = getch();
-    if (c == 'O') {
-      switch (c = getch())
-      {
-      case 'C': 
-	forward_chars();
-	break;
-    
-      case 'D':
-	backward_chars();
-	break;
-
-      case 'B':
-	next_lines();
-	break;
-
-      case 'A':
-	previous_lines();
-	break;
-
-      case 'H':
-	beginning_of_buffer();
-	break;
-
-      case 'F':
-	end_of_buffer();
-	break;
-
-      case 'P': /* F1 on a xterm */
-	help();
-	break;
-
-      case 'Q': /* F2 on a xterm */
-	save_buffer();
-	break;
-
-      case 'R': /* F3 on a xterm */
-	find_file();
-	break;
-
-      case 'S': /* F4 on a xterm */
-	goto_char();
-	break;
-
-      default: 
-	firstTimeHelp();
-      }
-    } else firstTimeHelp();
-    break;
-
-  case '[': 
-    for (i = 0;; i++) { tmp[i] = c = getch(); if (!isdigit(c)) break; }
-    tmp[i + 1] = '\0';
-    
-    if (0);
-    else if (streq(tmp, "2~")) yank();
-    else if (streq(tmp, "5~")) scroll_down();
-    else if (streq(tmp, "6~")) scroll_up();
-    else if (streq(tmp, "7~")) beginning_of_buffer();
-    else if (streq(tmp, "8~")) end_of_buffer();
-    else if (streq(tmp, "010q" /* F10 on a sgi's winterm */)) ask_about_save_and_quit();
-    else if (streq(tmp, "193z")) fill_with_string();
-    else if (streq(tmp, "214z")) beginning_of_line();
-    else if (streq(tmp, "216z")) scroll_down();
-    else if (streq(tmp, "220z")) end_of_line();
-    else if (streq(tmp, "222z")) scroll_up();
-    else if (streq(tmp, "233z")) ask_about_save_and_quit();
-    else if (streq(tmp, "234z" /* F11 on a sun */)) yank_to_a_file();
-    else if (streq(tmp, "247z")) yank();
-    else if (streq(tmp, "11~" /* F1 on a rxvt */)) help();
-    else if (streq(tmp, "12~" /* F2 on a rxvt */)) save_buffer();
-    else if (streq(tmp, "13~" /* F3 on a rxvt */)) find_file();
-    else if (streq(tmp, "14~" /* F4 on a rxvt */)) goto_char();
-    else if (streq(tmp, "15~" /* F5 on a rxvt */)) scroll_down();
-    else if (streq(tmp, "17~" /* F6 on a rxvt */)) scroll_up();
-    else if (streq(tmp, "18~" /* F7 on a rxvt */)) copy_region();
-    else if (streq(tmp, "19~" /* F8 on a rxvt */)) yank();
-    else if (streq(tmp, "20~" /* F9 on a rxvt */)) set_mark_command();
-    else if (streq(tmp, "21~" /* F10 on a rxvt */)) ask_about_save_and_quit();
-    else if (streq(tmp, "23~" /* F11 on a rxvt */)) yank_to_a_file();
-    else if (streq(tmp, "24~" /* F12 on a rxvt */)) fill_with_string();
-    else firstTimeHelp();
-    break;
-
   default:
     firstTimeHelp();
   }
 }
+
+/* vim: set et ai ts=2 sw=2 sts=2: */

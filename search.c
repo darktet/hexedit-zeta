@@ -24,7 +24,7 @@ static void searchB(INT loc, char *string);
 /*******************************************************************************/
 static int searchA(char **string, int *sizea, char *tmp, int tmp_size)
 {
-  char *msg = hexOrAscii ? "Hexa string to search: " : "Ascii string to search: ";
+  char *msg = hexOrAscii ? "Hex string to search: " : "Ascii string to search: ";
   char **last = hexOrAscii ? &lastAskHexString : &lastAskAsciiString;
 
   if (!ask_about_save_and_redisplay()) return FALSE;
@@ -108,4 +108,4 @@ void search_backward(void)
   searchB(quit + (quit >= 0 ? blockstart : 0), string);
 }
 
-
+/* vim: set et ai ts=4 sw=4 sts=2: */

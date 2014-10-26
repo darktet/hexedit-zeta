@@ -281,3 +281,5 @@ int get_number(INT *i)
     err = sscanf(tmp, "%lld", i);
   return err == 1;
 }
+
+/* vim: set et ai ts=4 sw=4 sts=2: */

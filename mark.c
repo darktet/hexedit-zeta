@@ -90,7 +90,7 @@ void yank_to_a_file(void)
 
 void fill_with_string(void)
 {
-  char *msg = hexOrAscii ? "Hexa string to fill with: " : "Ascii string to fill with: ";
+  char *msg = hexOrAscii ? "Hex string to fill with: " : "Ascii string to fill with: ";
   char **last = hexOrAscii ? &lastFillWithStringHexa : &lastFillWithStringAscii;
   char tmp2[BLOCK_SEARCH_SIZE];
   unsigned char *tmp1;
@@ -107,7 +107,7 @@ void fill_with_string(void)
   l2 = strlen(tmp2);
   if (hexOrAscii) {
     if (strlen(tmp2) == 1) {
-      if (!isxdigit(*tmp2)) { displayMessageAndWaitForKey("Invalid hexa string"); return; }
+      if (!isxdigit(*tmp2)) { displayMessageAndWaitForKey("Invalid hex string"); return; }
       *tmp2 = hexCharToInt(*tmp2);
     } else if (!hexStringToBinString(tmp2, &l2)) return;
   }
@@ -159,3 +159,5 @@ void updateMarked(void)
   if (mark_max >= getfilesize()) mark_max = getfilesize() - 1;
   markSelectedRegion();
 }
+
+/* vim: set et ai ts=4 sw=4 sts=2: */

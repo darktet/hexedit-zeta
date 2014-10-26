@@ -173,3 +173,4 @@ int hexStringToBinString(char *p, int *l)
   return TRUE;
 }
 
+/* vim: set et ai ts=4 sw=4 sts=2: */

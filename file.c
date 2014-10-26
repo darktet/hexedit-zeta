@@ -134,4 +134,4 @@ int is_file(char *name)
   return stat(name, &st) != -1 && !S_ISDIR(st.st_mode);
 }
 
-
+/* vim: set et ai ts=4 sw=4 sts=2: */

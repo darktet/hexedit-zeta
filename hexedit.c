@@ -131,7 +131,4 @@ void quit(void)
   exit(0);
 }
 
-
-
-
-
+/* vim: set et ai ts=4 sw=4 sts=2: */

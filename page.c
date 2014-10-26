@@ -155,11 +155,4 @@ void freePage(typePage *page)
   free(page);
 }
 
-
-
-
-
-
-
-
-
+/* vim: set et ai ts=4 sw=4 sts=2: */
