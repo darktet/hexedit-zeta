@@ -23,6 +23,7 @@ static void save_buffer(void);
 static void escaped_command(void);
 static void help(void);
 static void short_help(void);
+static void insert_string(void);
 
 
 /*******************************************************************************/
@@ -321,7 +322,7 @@ static void save_buffer(void)
       }
     q = p->next;
     freePage(p);
-  } 
+  }
   edited = NULL;
   if (lastEditedLoc > fileSize) fileSize = lastEditedLoc;
   lastEditedLoc = 0;
@@ -370,7 +371,7 @@ int key_to_function(int key)
   oldbase = base;
   /*printf("*******%d******\n", key);*/
 
-  switch (key) 
+  switch (key)
     {
     case 'l':
       if (!hexOrAscii) { goto SET_KEY; }
@@ -578,6 +579,10 @@ int key_to_function(int key)
       ask_about_save_and_quit();
       break;
 
+    case 'i':
+      insert_string();
+      break;
+
     default:
 SET_KEY:
       if ((key >= 256 || !setTo(key))) firstTimeHelp();
@@ -588,7 +593,7 @@ SET_KEY:
 
 
 
-static void escaped_command(void) 
+static void escaped_command(void)
 {
   char tmp[BLOCK_SEARCH_SIZE];
   int c, i;
@@ -606,6 +611,31 @@ static void escaped_command(void)
 
   default:
     firstTimeHelp();
+  }
+}
+
+static void insert_string(void) {
+  int res = ask_about_save();
+  if (res) {
+    int tmp_size = 256;
+    char tmp[tmp_size];
+    char *msg = hexOrAscii ? "Hex string to insert: " : "Ascii string to insert: ";
+    char **last = hexOrAscii ? &lastAskHexString : &lastAskAsciiString;
+    displayMessageAndGetString(msg, last, tmp, tmp_size);
+    int len = (int)strlen(tmp);
+    size_t filesize = getfilesize();
+    int i, j;
+    if (hexOrAscii) if (!hexStringToBinString(tmp, &len)) return;
+    for (i = filesize - 1; i >= base + cursor; i--) {
+      LSEEK(fd, i);
+      char tmpc;
+      read(fd, &tmpc, 1);
+      LSEEK(fd, i + len);
+      write(fd, &tmpc, 1);
+    }
+    LSEEK(fd, base + cursor);
+    write(fd, tmp, len);
+    readFile();
   }
 }
 
