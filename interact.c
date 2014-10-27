@@ -24,6 +24,7 @@ static void escaped_command(void);
 static void help(void);
 static void short_help(void);
 static void insert_string(void);
+static void remove_marked(void);
 
 
 /*******************************************************************************/
@@ -583,6 +584,10 @@ int key_to_function(int key)
       insert_string();
       break;
 
+    case 'd':
+      remove_marked();
+      break;
+
     default:
 SET_KEY:
       if ((key >= 256 || !setTo(key))) firstTimeHelp();
@@ -635,8 +640,33 @@ static void insert_string(void) {
     }
     LSEEK(fd, base + cursor);
     write(fd, tmp, len);
+    close(fd);
+    openFile();
     readFile();
   }
+}
+
+static void remove_marked(void) {
+  int i, j;
+  int mark_min = -1, mark_max = -1;
+  for (i = 0; i < page; i++) {
+    if (bufferAttr[i] & MARKED) {
+      if (mark_min < 0) mark_min = base + i;
+      mark_max = base + i;
+    } else if (mark_min > 0)
+      break;
+  }
+  char c;
+  for (i = mark_min, j = mark_max + 1; j < getfilesize(); i++, j++) {
+    LSEEK(fd, j);
+    read(fd, &c, 1);
+    LSEEK(fd, i);
+    write(fd, &c, 1);
+  }
+  ftruncate(fd, i);
+  close(fd);
+  openFile();
+  readFile();
 }
 
 /* vim: set et ai ts=2 sw=2 sts=2: */
