@@ -163,6 +163,7 @@ void display(void)
     move(i / lineLength, 0);
     displayLine(i, nbBytes);
   }
+  
   for (; i < page; i += lineLength) {
     int j;
     move(i / lineLength, 0);
@@ -196,8 +197,11 @@ void display(void)
 void displayLine(int offset, int max)
 {
   int i;
-
-  PRINTW(("%08lX   ", (int) (base + offset)));
+  if (offset / lineLength == cursor / lineLength) {
+    ATTRPRINTW(A_BOLD, ("%08lX   ", (int) (base + offset)));
+  } else {
+    PRINTW(("%08lX   ", (int) (base + offset)));
+  }
   for (i = offset; i < offset + lineLength; i++) {
     if (i > offset) MAXATTRPRINTW(bufferAttr[i] & MARKED, (((i - offset) % blocSize) ? " " : "  "));
     if (i < max) {
@@ -314,4 +318,4 @@ int get_number(INT *i)
   return err == 1;
 }
 
-/* vim: set et ai ts=4 sw=4 sts=2: */
+/* vim: set et ai ts=2 sw=2 sts=2: */
