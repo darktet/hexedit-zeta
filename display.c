@@ -112,6 +112,7 @@ void initCurses(void)
     init_pair(2, COLOR_GREEN, -1); /* control chars */
     init_pair(3, COLOR_BLUE, -1);  /* extended chars */
     init_pair(4, COLOR_CYAN, -1);
+    init_pair(5, COLOR_YELLOW, -1);
   // }
 #endif
 
@@ -163,7 +164,7 @@ void display(void)
     move(i / lineLength, 0);
     displayLine(i, nbBytes);
   }
-  
+
   for (; i < page; i += lineLength) {
     int j;
     move(i / lineLength, 0);
@@ -209,7 +210,7 @@ void displayLine(int offset, int max)
 #ifdef HAVE_COLORS
 		 (!colored ? 0 :
 		  buffer[i] == 0 ? COLOR_PAIR(1) :
-		  buffer[i] < ' ' ? COLOR_PAIR(2) : 
+		  buffer[i] < ' ' ? COLOR_PAIR(2) :
 		  buffer[i] >= 127 ? COLOR_PAIR(3) : 0) |
 #endif
 		 bufferAttr[i], ("%02X", buffer[i]));
