@@ -647,7 +647,7 @@ static void insert_string(void) {
     set_base(base_bak);
     set_cursor(base_bak + cursor_bak);
     for (i = cursor; i < cursor + len; i++)
-      bufferAttr[i] |= COLOR_YELLOW;
+      bufferAttr[i] |= COLOR_PAIR(5);
   }
 }
 
