@@ -621,6 +621,7 @@ static void escaped_command(void)
 
 static void insert_string(void) {
   int res = ask_about_save();
+  int base_bak = base, cursor_bak = cursor;
   if (res) {
     int tmp_size = 256;
     char tmp[tmp_size];
@@ -643,12 +644,15 @@ static void insert_string(void) {
     close(fd);
     openFile();
     readFile();
+    set_base(base_bak);
+    set_cursor(base_bak + cursor_bak);
   }
 }
 
 static void remove_marked(void) {
   int i, j;
   int mark_min = -1, mark_max = -1;
+  int base_bak = base, cursor_bak = cursor;
   for (i = 0; i < page; i++) {
     if (bufferAttr[i] & MARKED) {
       if (mark_min < 0) mark_min = base + i;
@@ -667,6 +671,8 @@ static void remove_marked(void) {
   close(fd);
   openFile();
   readFile();
+  set_base(base_bak);
+  set_cursor(base_bak + cursor_bak);
 }
 
 /* vim: set et ai ts=2 sw=2 sts=2: */
