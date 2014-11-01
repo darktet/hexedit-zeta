@@ -584,7 +584,7 @@ int key_to_function(int key)
       insert_string();
       break;
 
-    case 'd':
+    case 'z':
       remove_marked();
       break;
 
@@ -661,6 +661,9 @@ static void remove_marked(void) {
       mark_max = base + i;
     } else if (mark_min > 0)
       break;
+  }
+  if (mark_min < 0 || mark_max < 0 || mark_max < mark_min) {
+    return;
   }
   char c;
   for (i = mark_min, j = mark_max + 1; j < getfilesize(); i++, j++) {
