@@ -113,7 +113,7 @@ o \fIF1\fR, \fIEsc+H\fR \- help (show the man page).
 .br
 o \fICtrl+O\fR, \fIF3\fR \- open another file
 .br
-o \fICtrl+L\fR \- redisplay (refresh) the display (usefull when your terminal screws up).
+o \fICtrl+L\fR \- redisplay (refresh) the display (useful when your terminal screws up).
 .br
 o \fIBackspace\fR, \fICtrl+H\fR \- undo the modifications made on the previous byte.
 .br
@@ -150,7 +150,7 @@ While in --sector mode, it shows the sector the cursor is in.
 .SS Editing
 You can edit in ASCII or in hexadecimal. You can switch between the two with
 \fITab\fR. When the file is read-only, you can't edit it. When trying to edit a
-read-only file, a message (```File is read-only''') tells you it is non-writable.
+read-only file, a message "File is read-only" tells you it is non-writable.
 .br
 The modifications are shown in bold until they are saved.
 The modeline indicates whether you have modified the file or not.
@@ -167,8 +167,8 @@ by \fIhexedit\fR (like emacs' quoted-insert, or like the \\ character in C).
 .SS Searching
 You can search for a string in ASCII or in hexadecimal. You can switch
 between the two with \fITab\fR. If the string is found, the cursor is moved to
-the beginning of the matching location. If the search failed, a message (```not
-found''') tells you so. You can cancel the search by pressing a key.
+the beginning of the matching location. If the search failed, a message "not found"
+tells you so. You can cancel the search by pressing a key.
 .br
 The search in hexadecimal is a bit confusing. You must give a hexadecimal string
 with an even number of characters. The search can then be done byte by byte. If
@@ -225,9 +225,7 @@ You can find
 .I hexedit
 at 
 .br
-<http://rigaux.org/hexedit-VERSION.src.tgz> and 
-.br
-<http://rigaux.org/hexedit-VERSION.bin.i386.dynamic.tgz>.
+<https://github.com/pixel/hexedit/archive/@VERSION@.tar.gz>
 .SH TODO
 Anything you think could be nice...
 .SH LIMITATIONS
@@ -247,7 +245,7 @@ The hexadecimal search could be able to search modulo 4 bits instead of 8 bits.
 Another feature could be to complete padd odd length hexadecimal searches with
 zeros.
 .SH BUGS
-I have an example where the display is completly screwed up. It seems to be a
+I have an example where the display is completely screwed up. It seems to be a
 bug in ncurses (or maybe in xterm and rxvt)?? Don't know if it's me using
 ncurses badly or not... It seems to happen when \fIhexedit\fR leaves only one
 space at the end of the lines... If anyone has a (or the) solution, please tell

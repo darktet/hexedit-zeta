@@ -190,7 +190,7 @@ static void truncate_file(void)
 
 static void firstTimeHelp(void)
 {
-  int firstTime = TRUE;
+  static int firstTime = TRUE;
 
   if (firstTime) {
     firstTime = FALSE;

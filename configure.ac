@@ -3,18 +3,19 @@ dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
-AC_PREREQ(2.50)
+AC_PREREQ([2.69])
 
-AC_INIT(hexedit.c)
+AC_INIT
+AC_CONFIG_SRCDIR([hexedit.c])
 AC_CONFIG_HEADERS(config.h)
 
-define(TheVERSION, 1.2.13)
+define(TheVERSION, 1.6)
 
 PRODUCT=hexedit
 VERSION=TheVERSION
 INCL=hexedit.h
 SRCS="hexedit.c display.c mark.c page.c file.c interact.c misc.c search.c"
-OTHER="COPYING Changes TODO install-sh configure config.h.in hexedit.1 hexedit-TheVERSION.lsm Makefile.in configure.in Makefile-build.in"
+OTHER="COPYING Changes TODO install-sh configure config.h.in hexedit.1 hexedit-TheVERSION.lsm Makefile.in configure.ac Makefile-build.in"
 AC_SUBST(PRODUCT)
 AC_SUBST(VERSION)
 AC_SUBST(INCL)
@@ -35,8 +36,10 @@ AC_PROG_INSTALL
 
 dnl Checks for libraries.
 AC_CHECK_LIB(curses, initscr, LIBS="$LIBS -lcurses",
-  AC_CHECK_LIB(ncurses, initscr, LIBS="$LIBS -lncurses")
+  [AC_CHECK_LIB(ncurses, initscr, LIBS="$LIBS -lncurses",
+    AC_MSG_ERROR([libcurses/libncurses not found.]))]
 )
+AC_CHECK_LIB(tinfo, keypad, LIBS="$LIBS -ltinfo")
 AC_CHECK_FUNC(use_default_colors, 
   AC_DEFINE(HAVE_COLORS, , "Define if you want colored (fruit salad) display option")
 )
@@ -47,7 +50,7 @@ dnl whether functions and headers are available, whether they work, etc.
 AC_SYS_LARGEFILE
 
 dnl Checks for header files.
-AC_HEADER_STDC
+AC_PROG_EGREP
 AC_HEADER_STAT
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h unistd.h libgen.h sys/mount.h)
@@ -71,4 +74,5 @@ $ac_includes_default
 #endif
 )
 
-AC_OUTPUT(Makefile Makefile-build)
+AC_CONFIG_FILES([Makefile Makefile-build hexedit.1])
+AC_OUTPUT

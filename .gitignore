@@ -1,7 +1,12 @@
-*.o
+#output
 hexedit
+
+#build system dirt
+configure
+config.*
+!config.h.in
 Makefile
-config.h
-config.log
-config.status
 Makefile-build
+
+#compiled object files
+*.o

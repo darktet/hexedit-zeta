@@ -4,6 +4,7 @@ PRODUCT = @PRODUCT@
 VERSION = @VERSION@
 
 prefix = @prefix@
+datarootdir = @datarootdir@
 exec_prefix = @exec_prefix@
 mandir = @mandir@/man1
 bindir = @bindir@
@@ -18,7 +19,7 @@ DYNAMICBIN = $(PRODUCT)-$(VERSION).bin.i386.dynamic.tgz
 HTMLSITE = $(PRODUCT)-html-site.tar
 HTMLFILES = $(PRODUCT).html
 TMPFILES = $(DYNAMICBIN) $(TARSOURCE) $(HTMLFILES)
-FROMINFILES = hexedit-$(VERSION).lsm hexedit.1
+FROMINFILES = hexedit.1
 
 dynamic:
 	$(MAKE) $(PRODUCT)
@@ -34,9 +35,6 @@ tar: $(ALL)
 
 docs:
 	man2html $(PRODUCT).1
-
-hexedit-$(VERSION).lsm: hexedit.lsm.in
-	m4 -DVERSION=$(VERSION) $< > $@
 
 hexedit.1: hexedit.1.in
 	m4 -DVERSION=$(VERSION) $< > $@

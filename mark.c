@@ -52,7 +52,7 @@ void copy_region(void)
       INT min = MIN(p->base, mark_min);
       memcpy(copyBuffer + p->base - min, 
 	     p->vals + mark_min - min,
-	     MIN(p->base + p->size, mark_max) - MAX(p->base, mark_min) + 1);
+	     MIN(MIN(p->base + p->size, mark_max) - MAX(p->base, mark_min) + 1, p->size));
     }
   }
   unmarkAll();
@@ -112,6 +112,10 @@ void fill_with_string(void)
     } else if (!hexStringToBinString(tmp2, &l2)) return;
   }
   tmp1 = malloc(l1);
+  if (!tmp1) {
+    displayMessageAndWaitForKey("Can't allocate memory");
+    return;
+  }
   for (i = 0; i < l1 - l2 + 1; i += l2) memcpy(tmp1 + i, tmp2, l2);
   memcpy(tmp1 + i, tmp2, l1 - i);
   addToEdited(mark_min, l1, tmp1);

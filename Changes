@@ -1,3 +1,39 @@
+april 2022
+    - 1.6
+    - configure script must error-out when (n)curses isn't found
+    - Move SIGWINCH handling from handler to NCURSES
+    - Make configure.ac compliant with autoconf >= 2.70
+    - Check that malloc did not return NULL
+    - Fix a possible memory leak in findFile()
+    - Prevent division by zero on empty files.
+
+august 2020
+    - 1.5
+	- Fix searching very long string
+	- Keep status of firstTime beween calls. (#35)
+	- man page: use simple double quotes (instead of weird ```xxx''')
+	- Properly handle off_t on non-lfs 32 bit systems.
+	- Fixed compiler warnings.
+	- Do not allow negative line length. (#34)
+	- fix overflow on excessively long escape sequence. (#32)
+	- Ignore KEY_RESIZE in main loop. (#33)
+	- Show percentage of cursor relative to filesize.
+	- Bug copy & paste (#29)
+
+september 2017
+	- 1.4.2
+	- fix spelling errors in manpage
+	- fix build
+
+septembre 2017
+	- 1.4
+	- terminal resizing support
+	- fix build
+
+novembre 2016:
+	- mark cursor position in both HEX and ASCII
+	- skip whitespace when parsing hex-strings
+
 march 2014:
 	- fix small but in DIE() which was leaving the terminal in a bad state
 	- added --linelength <n> / -l<n> command line option

@@ -100,8 +100,10 @@ int computeCursorXPos(int cursor, int hexOrAscii)
 /*******************************************************************************/
 /* Curses functions */
 /*******************************************************************************/
+
 void initCurses(void)
 {
+  struct sigaction sa;
   initscr();
 
 #ifdef HAVE_COLORS
@@ -116,6 +118,11 @@ void initCurses(void)
   // }
 #endif
 
+  initDisplay();
+}
+
+void initDisplay(void)
+{
   refresh();
   raw();
   noecho();
@@ -139,13 +146,13 @@ void initCurses(void)
       if (lineLength == 0) DIE("%s: term is too small (width)\n");
     } else {
       if (computeLineSize() > COLS)
-	DIE("%s: term is too small (width) for selected line length\n");
+        DIE("%s: term is too small (width) for selected line length\n");
     }
     page = lineLength * (LINES - 1);
   }
   colsUsed = computeLineSize();
-  buffer = malloc(page);
-  bufferAttr = malloc(page * sizeof(*bufferAttr));
+  buffer = realloc(buffer,page);
+  bufferAttr = realloc(bufferAttr,page * sizeof(*bufferAttr));
 }
 
 void exitCurses(void)
@@ -158,6 +165,7 @@ void exitCurses(void)
 
 void display(void)
 {
+  long long fsize;
   int i;
 
   for (i = 0; i < nbBytes; i += lineLength) {
@@ -180,7 +188,6 @@ void display(void)
   if (isReadOnly) i = '%';
   else if (edited) i = '*';
   else i = ' ';
-
   int cu = colsUsed * 3 / 4;
   cu = cu - cu % 13 + 11 - 13 - 2;
   move(LINES-1, cu);
@@ -220,21 +227,21 @@ void displayLine(int offset, int max)
   PRINTW(("  "));
   for (i = offset; i < offset + lineLength; i++) {
     if (i >= max) PRINTW((" "));
-    else if (buffer[i] >= ' ' && buffer[i] < 127) ATTRPRINTW(bufferAttr[i], ("%c", buffer[i]));
-    else ATTRPRINTW(bufferAttr[i], ("."));
+    else if (buffer[i] >= ' ' && buffer[i] < 127) ATTRPRINTW((cursor == i && hexOrAscii==1 ? mark_color : 0) | bufferAttr[i], ("%c", buffer[i]));
+    else ATTRPRINTW((cursor == i && hexOrAscii == 1 ? mark_color : 0) | bufferAttr[i], ("."));
   }
 }
 
 void clr_line(int line) { move(line, 0); clrtoeol(); }
 
-void displayCentered(char *msg, int line)
+void displayCentered(const char *msg, int line)
 {
   clr_line(line);
   move(line, (COLS - strlen(msg)) / 2);
   PRINTW(("%s", msg));
 }
 
-void displayOneLineMessage(char *msg)
+void displayOneLineMessage(const char *msg)
 {
   int center = page / lineLength / 2;
   clr_line(center - 1);
@@ -260,13 +267,13 @@ void displayTwoLineMessage(char *msg1, char *msg2)
   displayCentered(msg2, center);
 }
 
-void displayMessageAndWaitForKey(char *msg)
+void displayMessageAndWaitForKey(const char *msg)
 {
   displayTwoLineMessage(msg, pressAnyKey);
   getch();
 }
 
-int displayMessageAndGetString(char *msg, char **last, char *p, int p_size)
+int displayMessageAndGetString(const char *msg, char **last, char *p, int p_size)
 {
   int ret = TRUE;
 
@@ -293,6 +300,7 @@ void ungetstr(char *s)
 
 int get_number(INT *i)
 {
+  unsigned long long n;
   int err;
   char tmp[BLOCK_SEARCH_SIZE];
   echo();
@@ -313,9 +321,12 @@ int get_number(INT *i)
     }
   }
   if (strbeginswith(tmp, "0x"))
-    err = sscanf(tmp + strlen("0x"), "%llx", i);
+    err = sscanf(tmp + strlen("0x"), "%llx", &n);
   else
-    err = sscanf(tmp, "%lld", i);
+    err = sscanf(tmp, "%llu", &n);
+  *i = (off_t)n;
+  if (*i < 0 || n != (unsigned long long) *i)
+    err = 0;
   return err == 1;
 }
 
